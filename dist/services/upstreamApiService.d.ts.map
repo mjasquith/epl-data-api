@@ -1,0 +1,1 @@
+{"version":3,"file":"upstreamApiService.d.ts","sourceRoot":"","sources":["../../src/services/upstreamApiService.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,KAAK,EAAE,MAAM,kBAAkB,CAAC;AAMzC,KAAK,SAAS,GAAG,UAAU,GAAG,SAAS,CAAC;AAOxC,iBAAe,YAAY,CAAC,SAAS,EAAE,SAAS,GAAG,OAAO,CAAC,KAAK,EAAE,CAAC,CAuClE;AA0CD,OAAO,EAAE,YAAY,EAAE,CAAC"}
