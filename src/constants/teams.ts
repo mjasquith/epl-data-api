@@ -6,7 +6,7 @@ export const TEAM_NAME_MAP: Record<string, string> = {
   FUL: 'Fulham',
   LIV: 'Liverpool',
   MCI: 'Man City',
-  MUN: 'Man Unt',
+  MUN: 'Man Utd',
   NEW: 'Newcastle',
   SUN: 'Sunderland',
   TOT: 'Spurs',
