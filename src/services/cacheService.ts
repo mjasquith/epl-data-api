@@ -3,7 +3,7 @@ import { config } from '../config';
 
 interface CacheEntry<T> {
   data: T;
-  timestamp: number;
+  expires: number;
 }
 
 class CacheService {
@@ -11,21 +11,18 @@ class CacheService {
   private defaultTtlMs: number = config.cache?.defaultTtlMs ?? 5 * 60 * 1000;
 
   set(key: string, data: Match[], ttlMs?: number): void {
+    const effectiveTtl = ttlMs ?? this.defaultTtlMs;
     this.cache.set(key, {
       data,
-      timestamp: Date.now(),
+      expires: Date.now() + effectiveTtl,
     });
   }
 
-  get(key: string, ttlMs?: number): Match[] | null {
+  get(key: string): Match[] | null {
     const entry = this.cache.get(key);
-    if (!entry) {
-      return null;
-    }
+    if (!entry) return null;
 
-    const effectiveTtl = ttlMs ?? this.defaultTtlMs;
-    const isExpired = Date.now() - entry.timestamp > effectiveTtl;
-    if (isExpired) {
+    if (Date.now() > entry.expires) {
       this.cache.delete(key);
       return null;
     }

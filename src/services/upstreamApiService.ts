@@ -40,7 +40,7 @@ async function fetchMatches(matchType: MatchType): Promise<Match[]> {
     return matches;
   } catch (err) {
     // Fall back to cached data on error
-    const cached = cacheService.get(cacheKey, cacheTtl);
+    const cached = cacheService.get(cacheKey);
     if (cached) {
       console.warn(
         `Upstream API error, returning cached ${matchType} data`,
