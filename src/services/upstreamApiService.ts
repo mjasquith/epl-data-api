@@ -33,12 +33,37 @@ async function fetchMatches(matchType: MatchType): Promise<Match[]> {
     }
 
     const data = await response.json();
-    const matches = data.matches.map(mapMatchToFixture);
+    const upstreamMatches: UpstreamMatch[] = data.matches ?? [];
+
+    // Group matches by round (matchday) and compute matchNumber per spec:
+    // matchNumber = (roundNumber * 10) + n  where n is 1-based index within the round.
+    const byRound = new Map<number, UpstreamMatch[]>();
+    for (const m of upstreamMatches) {
+      const round = m.matchday ?? 0;
+      const arr = byRound.get(round) ?? [];
+      arr.push(m);
+      byRound.set(round, arr);
+    }
+
+    // Build mapped matches, sorting each round by date to ensure deterministic index order
+    const mappedMatches: Match[] = [];
+    const rounds = Array.from(byRound.keys()).sort((a, b) => a - b);
+    for (const roundNumber of rounds) {
+      const matchesInRound = byRound.get(roundNumber) ?? [];
+      matchesInRound.sort(
+        (a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+      );
+      matchesInRound.forEach((m, idx) => {
+        const indexInRound = idx + 1;
+        const computedMatchNumber = roundNumber * 10 + indexInRound;
+        mappedMatches.push(mapMatchToFixture(m, computedMatchNumber));
+      });
+    }
 
     // Cache successful response with configured TTL
-    cacheService.set(cacheKey, matches, cacheTtl);
+    cacheService.set(cacheKey, mappedMatches, cacheTtl);
 
-    return matches;
+    return mappedMatches;
   } catch (err) {
     // Fall back to cached data on error
     const cached = cacheService.get(cacheKey);
@@ -64,10 +89,13 @@ interface UpstreamMatch {
   score?: { fullTime: { home: number | null; away: number | null } };
 }
 
-function mapMatchToFixture(match: UpstreamMatch): Match {
+function mapMatchToFixture(match: UpstreamMatch, matchNumberOverride?: number): Match {
+  const round = match.matchday ?? 0;
+  const matchNumber = matchNumberOverride ?? (match.id);
+
   return {
-    matchNumber: match.id,
-    roundNumber: match.matchday,
+    matchNumber,
+    roundNumber: round,
     dateUtc: match.utcDate,
     homeTeam: getTeamName(match.homeTeam.tla),
     awayTeam: getTeamName(match.awayTeam.tla),
