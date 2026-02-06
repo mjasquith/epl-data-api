@@ -10,7 +10,7 @@ type MatchType = 'fixtures' | 'results';
 
 const QUERY_PARAMS: Record<MatchType, string> = {
   fixtures: 'status=SCHEDULED,POSTPONED,SUSPENDED',
-  results: 'status=LIVE,FINISHED',
+  results: 'status=IN_PLAY,PAUSED,FINISHED',
 };
 
 async function fetchMatches(matchType: MatchType): Promise<Match[]> {
@@ -114,6 +114,7 @@ function mapStatus(
     case 'SUSPENDED':
       return 'Scheduled';
     case 'IN_PLAY':
+    case 'PAUSED':
       return 'Live';
     case 'FINISHED':
       return 'Complete';
