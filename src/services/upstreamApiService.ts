@@ -55,7 +55,7 @@ async function fetchMatches(matchType: MatchType): Promise<Match[]> {
       );
       matchesInRound.forEach((m, idx) => {
         const indexInRound = idx + 1;
-        const computedMatchNumber = roundNumber * 10 + indexInRound;
+        const computedMatchNumber = (roundNumber - 1) * 10 + indexInRound;
         mappedMatches.push(mapMatchToFixture(m, computedMatchNumber));
       });
     }
