@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { Match } from '../types/fixture';
 import { cacheService } from './cacheService';
+import { getTeamName } from '../constants/teams';
 
 const BASE_URL = 'https://api.football-data.org/v4';
 const MATCHES_ENDPOINT = '/competitions/PL/matches';
@@ -57,8 +58,8 @@ interface UpstreamMatch {
   id: number;
   utcDate: string;
   matchday: number;
-  homeTeam: { name: string };
-  awayTeam: { name: string };
+  homeTeam: { name: string; tla: string };
+  awayTeam: { name: string; tla: string };
   status: string;
   score?: { fullTime: { home: number | null; away: number | null } };
 }
@@ -68,8 +69,8 @@ function mapMatchToFixture(match: UpstreamMatch): Match {
     matchNumber: match.id,
     roundNumber: match.matchday,
     dateUtc: match.utcDate,
-    homeTeam: match.homeTeam.name,
-    awayTeam: match.awayTeam.name,
+    homeTeam: getTeamName(match.homeTeam.tla),
+    awayTeam: getTeamName(match.awayTeam.tla),
     status: mapStatus(match.status),
     homeTeamScore: match.score?.fullTime?.home ?? undefined,
     awayTeamScore: match.score?.fullTime?.away ?? undefined,
