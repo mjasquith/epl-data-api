@@ -6,11 +6,12 @@ import { getTeamName } from '../constants/teams';
 const BASE_URL = 'https://api.football-data.org/v4';
 const MATCHES_ENDPOINT = '/competitions/PL/matches';
 
-type MatchType = 'fixtures' | 'results';
+type MatchType = 'fixtures' | 'results' | 'all';
 
 const QUERY_PARAMS: Record<MatchType, string> = {
   fixtures: 'status=SCHEDULED,POSTPONED,SUSPENDED',
   results: 'status=IN_PLAY,PAUSED,FINISHED',
+  all: '', // No status filter, fetch all matches
 };
 
 async function fetchMatches(matchType: MatchType): Promise<Match[]> {

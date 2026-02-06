@@ -34,39 +34,8 @@ export async function getAllMatches(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const [fixtures, results] = await Promise.all([
-      fetchMatches('fixtures'),
-      fetchMatches('results'),
-    ]);
-
-    // combine and dedupe by matchNumber, prefer entries that include scores
-    const mergedMap = new Map<number, Match>();
-
-    const combined = [...fixtures, ...results];
-    for (const m of combined) {
-      const existing = mergedMap.get(m.matchNumber);
-      if (!existing) {
-        mergedMap.set(m.matchNumber, m);
-        continue;
-      }
-
-      const existingHasScores =
-        existing.homeTeamScore !== undefined || existing.awayTeamScore !== undefined;
-      const newHasScores =
-        m.homeTeamScore !== undefined || m.awayTeamScore !== undefined;
-
-      // prefer the record that contains scores (results)
-      if (newHasScores && !existingHasScores) {
-        mergedMap.set(m.matchNumber, m);
-      }
-      // otherwise keep existing
-    }
-
-    const mergedArray = Array.from(mergedMap.values()).sort((a, b) =>
-      new Date(a.dateUtc).getTime() - new Date(b.dateUtc).getTime()
-    );
-
-    res.json(mergedArray);
+    const results = await fetchMatches('all');
+    res.json(results);
   } catch (err) {
     _next(err);
   }
