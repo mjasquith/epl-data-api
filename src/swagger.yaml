@@ -10,7 +10,9 @@ info:
 servers:
   - url: http://localhost:3000
     description: Development server
-  - url: https://api.example.com
+  - url: https://epl-data-api-staging.up.railway.app
+    description: Staging (testing) server
+  - url: https://epl-data-api-production.up.railway.app
     description: Production server
 
 paths:
