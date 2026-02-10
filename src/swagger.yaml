@@ -1,0 +1,182 @@
+openapi: 3.0.0
+info:
+  title: EPL Data API
+  description: Simplify the retrieval of Premier League fixtures and results data
+  version: 1.0.0
+  contact:
+    name: mjasquith
+    url: https://github.com/mjasquith/epl-data-api
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the API
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+
+  /matches/fixtures:
+    get:
+      summary: Get upcoming and scheduled matches
+      description: Retrieves all upcoming, postponed, and suspended Premier League fixtures
+      tags:
+        - Matches
+      responses:
+        '200':
+          description: List of fixtures retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /matches/results:
+    get:
+      summary: Get live and completed matches
+      description: Retrieves all live and finished Premier League matches
+      tags:
+        - Matches
+      responses:
+        '200':
+          description: List of results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /matches/all:
+    get:
+      summary: Get all matches
+      description: Retrieves all Premier League matches regardless of status
+      tags:
+        - Matches
+      responses:
+        '200':
+          description: List of all matches retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Match:
+      type: object
+      required:
+        - matchNumber
+        - roundNumber
+        - dateUtc
+        - homeTeam
+        - awayTeam
+        - status
+      properties:
+        matchNumber:
+          type: integer
+          description: Unique match identifier computed as (roundNumber - 1) * 10 + indexInRound
+          example: 1
+        roundNumber:
+          type: integer
+          description: Premier League matchday/round number
+          example: 1
+        dateUtc:
+          type: string
+          format: date-time
+          description: Match date and time in UTC
+          example: 2024-08-16T19:30:00Z
+        homeTeam:
+          type: string
+          description: Home team name
+          example: Arsenal
+        awayTeam:
+          type: string
+          description: Away team name
+          example: Liverpool
+        status:
+          type: string
+          enum:
+            - Scheduled
+            - Live
+            - Complete
+          description: Current status of the match
+          example: Scheduled
+        homeTeamScore:
+          type: integer
+          nullable: true
+          description: Home team score (only populated for completed or live matches)
+          example: 2
+        awayTeamScore:
+          type: integer
+          nullable: true
+          description: Away team score (only populated for completed or live matches)
+          example: 1
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - message
+            - status
+          properties:
+            message:
+              type: string
+              description: Error message
+              example: Upstream API error
+            status:
+              type: integer
+              description: HTTP status code
+              example: 500
+            code:
+              type: string
+              nullable: true
+              description: Optional error code
+              example: null
+
+tags:
+  - name: Health
+    description: API health status
+  - name: Matches
+    description: Premier League match data endpoints

@@ -1,11 +1,27 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'js-yaml';
+import * as fs from 'fs';
+import * as path from 'path';
 import errorHandler from './middleware/errorHandler';
 import fixtureRouter from './routes/fixtureRouter';
 
 const app = express();
 
+// Load Swagger YAML
+const swaggerPath = path.join(__dirname, '../src/swagger.yaml');
+const swaggerDoc: any = YAML.load(fs.readFileSync(swaggerPath, 'utf8'));
+
 // Middleware
 app.use(express.json());
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+
+// Redirect root to API docs
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
 
 // Routes
 app.get('/health', (req, res) => {
