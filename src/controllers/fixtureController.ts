@@ -1,6 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
 import { fetchMatches } from '../services/upstreamApiService';
-import { Match } from '../types/fixture';
+import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
+import { cacheService, CacheResponse } from '../services/cacheService';
+
+async function getData(matchType: MatchType): Promise<Match[]> {
+
+  const cached: CacheResponse<Match[]> = cacheService.get("matches", matchType);
+  const cacheStatus: string = cached ? (cached.expired ? "EXPIRED" : "HIT") : "MISS";
+  if (cacheStatus === "HIT") {
+      return cached.data ?? [];
+  }
+
+  const fetchedMatches: MatchFetchResponse = await fetchMatches(matchType);
+  if (fetchedMatches.success) {
+    cacheService.set("matches", matchType, fetchedMatches.data);
+    return fetchedMatches.data;
+  }
+
+  console.log(`Failed to fetch ${matchType} from upstream API: ${fetchedMatches.error}`);
+
+  if (cached && cached.data) {
+    console.log(`Using expired cache data for matches_${matchType} due to upstream API failure`);
+    return cached.data;
+  }
+
+  return [];
+}
 
 export async function getFixtures(
   _req: Request,
@@ -8,7 +33,7 @@ export async function getFixtures(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const fixtures = await fetchMatches('fixtures');
+    const fixtures = await getData('fixtures');
     res.json(fixtures);
   } catch (err) {
     _next(err);
@@ -21,7 +46,7 @@ export async function getResults(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const results = await fetchMatches('results');
+    const results = await getData('results');
     res.json(results);
   } catch (err) {
     _next(err);
@@ -34,7 +59,7 @@ export async function getAllMatches(
   _next: NextFunction
 ): Promise<void> {
   try {
-    const results = await fetchMatches('all');
+    const results = await getData('all');
     res.json(results);
   } catch (err) {
     _next(err);

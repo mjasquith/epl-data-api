@@ -1,12 +1,9 @@
 import { config } from '../config';
-import { Match } from '../types/fixture';
-import { cacheService } from './cacheService';
+import { Match, MatchType, MatchFetchResponse } from '../types/fixture';
 import { getTeamName } from '../constants/teams';
 
 const BASE_URL = 'https://api.football-data.org/v4';
 const MATCHES_ENDPOINT = '/competitions/PL/matches';
-
-type MatchType = 'fixtures' | 'results' | 'all';
 
 const QUERY_PARAMS: Record<MatchType, string> = {
   fixtures: 'status=SCHEDULED,POSTPONED,SUSPENDED',
@@ -14,12 +11,11 @@ const QUERY_PARAMS: Record<MatchType, string> = {
   all: '', // No status filter, fetch all matches
 };
 
-async function fetchMatches(matchType: MatchType): Promise<Match[]> {
-  const cacheKey = `matches_${matchType}`;
+async function fetchMatches(matchType: MatchType): Promise<MatchFetchResponse> {
   const url = `${BASE_URL}${MATCHES_ENDPOINT}?${QUERY_PARAMS[matchType]}`;
-  const cacheTtl = config.cache?.matches?.[matchType];
 
   try {
+    console.log(`Fetching ${matchType} from upstream API: ${url}`);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -28,55 +24,19 @@ async function fetchMatches(matchType: MatchType): Promise<Match[]> {
     });
 
     if (!response.ok) {
-      throw new Error(
-        `Upstream API error: ${response.status} ${response.statusText}`
-      );
+      console.log(`Upstream API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
     const upstreamMatches: UpstreamMatch[] = data.matches ?? [];
 
-    // Group matches by round (matchday) and compute matchNumber per spec:
-    // matchNumber = (roundNumber * 10) + n  where n is 1-based index within the round.
-    const byRound = new Map<number, UpstreamMatch[]>();
-    for (const m of upstreamMatches) {
-      const round = m.matchday ?? 0;
-      const arr = byRound.get(round) ?? [];
-      arr.push(m);
-      byRound.set(round, arr);
-    }
-
     // Build mapped matches, sorting each round by date to ensure deterministic index order
-    const mappedMatches: Match[] = [];
-    const rounds = Array.from(byRound.keys()).sort((a, b) => a - b);
-    for (const roundNumber of rounds) {
-      const matchesInRound = byRound.get(roundNumber) ?? [];
-      matchesInRound.sort(
-        (a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
-      );
-      matchesInRound.forEach((m, idx) => {
-        const indexInRound = idx + 1;
-        const computedMatchNumber = (roundNumber - 1) * 10 + indexInRound;
-        mappedMatches.push(mapMatchToFixture(m, computedMatchNumber));
-      });
-    }
+    const mappedMatches: Match[] = mutateUpstreamMatchesToSortedMatchArray(upstreamMatches);
+    return { success: true, data: mappedMatches };
 
-    // Cache successful response with configured TTL
-    cacheService.set(cacheKey, mappedMatches, cacheTtl);
-
-    return mappedMatches;
   } catch (err) {
-    // Fall back to cached data on error
-    const cached = cacheService.get(cacheKey);
-    if (cached) {
-      console.warn(
-        `Upstream API error, returning cached ${matchType} data`,
-        err
-      );
-      return cached;
-    }
-
-    throw err;
+    return { success: false, data: [], error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -88,6 +48,36 @@ interface UpstreamMatch {
   awayTeam: { name: string; tla: string };
   status: string;
   score?: { fullTime: { home: number | null; away: number | null } };
+}
+
+function mutateUpstreamMatchesToSortedMatchArray(upstreamMatches: UpstreamMatch[]): Match[] {
+  // Group matches by round (matchday) and compute matchNumber per spec:
+  // matchNumber = (roundNumber * 10) + n  where n is 1-based index within the round.
+  const byRound = new Map<number, UpstreamMatch[]>();
+  for (const m of upstreamMatches) {
+    const round = m.matchday ?? 0;
+    const arr = byRound.get(round) ?? [];
+    arr.push(m);
+    byRound.set(round, arr);
+  }
+
+  // Build mapped matches, sorting each round by date to ensure deterministic index order
+  const mappedMatches: Match[] = [];
+  const rounds = Array.from(byRound.keys()).sort((a, b) => a - b);
+  for (const roundNumber of rounds) {
+    const matchesInRound = byRound.get(roundNumber) ?? [];
+    matchesInRound.sort(
+      (a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+    );
+    matchesInRound.forEach((m, idx) => {
+      const indexInRound = idx + 1;
+      const computedMatchNumber = (roundNumber - 1) * 10 + indexInRound;
+      mappedMatches.push(mapMatchToFixture(m, computedMatchNumber));
+    });
+  }
+
+  return mappedMatches;
+
 }
 
 function mapMatchToFixture(match: UpstreamMatch, matchNumberOverride?: number): Match {

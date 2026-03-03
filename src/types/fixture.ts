@@ -9,5 +9,10 @@ export interface Match {
   awayTeamScore?: number;
 }
 
-// For backward compatibility (optional)
-export type Fixture = Match;
+export type MatchType = 'fixtures' | 'results' | 'all';
+
+export type MatchFetchResponse = {
+  success: boolean;
+  data: Match[];
+  error?: Error;
+}
