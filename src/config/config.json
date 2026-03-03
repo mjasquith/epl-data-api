@@ -1,11 +1,11 @@
 {
   "footballDataApiToken": "your-api-token-here",
   "cache": {
-    "defaultTtlMs": 30000,
+    "defaultTtlMs": 300000,
     "matches": {
       "fixtures": 300000,
       "results": 300000,
-      "all": 30000
+      "all": 300000
     }
   }
 }
