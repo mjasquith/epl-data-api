@@ -1,8 +1,8 @@
 import express from 'express';
-import swaggerUi from 'swagger-ui-express';
-import YAML from 'js-yaml';
 import * as fs from 'fs';
+import YAML from 'js-yaml';
 import * as path from 'path';
+import swaggerUi from 'swagger-ui-express';
 import errorHandler from './middleware/errorHandler';
 import fixtureRouter from './routes/fixtureRouter';
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFixtures, getResults, getAllMatches } from '../controllers/fixtureController';
+import { getAllMatches, getFixtures, getResults } from '../controllers/fixtureController';
 
 const router = Router();
 

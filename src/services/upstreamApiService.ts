@@ -1,6 +1,6 @@
 import { config } from '../config';
-import { Match, MatchType, MatchFetchResponse } from '../types/fixture';
 import { getTeamName } from '../constants/teams';
+import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
 
 const BASE_URL = 'https://api.football-data.org/v4';
 const MATCHES_ENDPOINT = '/competitions/PL/matches';

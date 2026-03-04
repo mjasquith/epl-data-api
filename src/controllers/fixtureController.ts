@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { CacheResponse, cacheService } from '../services/cacheService';
 import { fetchMatches } from '../services/upstreamApiService';
 import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
-import { cacheService, CacheResponse } from '../services/cacheService';
 
 async function getData(matchType: MatchType): Promise<Match[]> {
 
