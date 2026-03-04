@@ -39,14 +39,14 @@ async function fetchMatches(matchType: MatchType): Promise<MatchFetchResponse> {
       throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
     }
 
+    const data = await response.json();
     log({ 
       level: 'INFO', 
       message: `Successfully fetched '${matchType}' from upstream API`, 
       context: 'upstreamApiService',
-      customAttributes: { matchType, url, length: response.headers.get('content-length') }
+      customAttributes: { matchType, url, length: data.length }
     });
 
-    const data = await response.json();
     const upstreamMatches: UpstreamMatch[] = data.matches ?? [];
 
     // Build mapped matches, sorting each round by date to ensure deterministic index order
