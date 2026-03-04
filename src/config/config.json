@@ -3,7 +3,7 @@
   "cache": {
     "defaultTtlMs": 300000,
     "matches": {
-      "fixtures": 300000,
+      "fixtures": 3600000,
       "results": 300000,
       "all": 300000
     }
