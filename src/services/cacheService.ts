@@ -1,4 +1,5 @@
 import { config, getCacheTtl } from '../config';
+import { log } from '../utils/logger';
 
 interface CacheEntry<T> {
   data: T;
@@ -18,26 +19,52 @@ class CacheService {
 
     const cacheTtl = getCacheTtl(cacheCategory, cacheType);
     const cacheKey = `${cacheCategory}_${cacheType}`;
+    const expires = new Date(Date.now() + cacheTtl);
 
     this.cache.set(cacheKey, {
       data,
-      expires: Date.now() + cacheTtl,
+      expires: expires.getTime(),
     });
-    console.log(`Cache set for "${cacheKey}" with TTL of ${cacheTtl} ms (expires at ${new Date(Date.now() + cacheTtl).toISOString()})`);
+    log({ 
+      level: 'INFO', 
+      message: `Cache set for '${cacheKey}' with TTL of ${cacheTtl} ms`, 
+      context: 'cacheService',
+      customAttributes: {
+        cacheCategory,
+        cacheType,
+        cacheTtl,
+        expiresAt: expires.toISOString(),
+        dataLength: JSON.stringify(data).length
+      } 
+    });
   }
 
   get(cacheCategory: string, cacheType: string): CacheResponse<any> {
     const cacheKey = `${cacheCategory}_${cacheType}`;
     const entry = this.cache.get(cacheKey);
     if (!entry) {
-      console.log(`${cacheKey}: Cache MISS - no entry found`);
+      log({ 
+        level: 'INFO', 
+        message: `${cacheKey}: Cache MISS - no entry found`, 
+        context: 'cacheService',
+        customAttributes: { cacheCategory, cacheType }
+      });
       return { data: null, expired: true };
     }
 
     const cacheStatus: string = Date.now() > entry.expires ? "EXPIRED" : "HIT";
     const expiresAt: string = new Date(entry.expires).toISOString();
-    const now: string = new Date().toISOString();
-    console.log(`${cacheKey}: Cache ${cacheStatus} expires at ${expiresAt}, current time is ${now}`);
+    log({ 
+      level: 'INFO', 
+      message: `${cacheKey}: Cache ${cacheStatus}`, 
+      context: 'cacheService',
+      customAttributes: {
+        cacheCategory,
+        cacheType,
+        expiresAt,
+        dataLength: JSON.stringify(entry.data).length
+      }
+    });
 
     return { 
       data: entry.data, 

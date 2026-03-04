@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { log } from '../utils/logger';
 
 interface ApiError extends Error {
     status?: number;
@@ -18,8 +19,12 @@ export default function errorHandler(
         error?.message ?? 'An unexpected error occurred';
 
     // Minimal logging (replace with your logger)
-    // eslint-disable-next-line no-console
-    console.error('[error]', { message, status, code, err });
+    log({ 
+        level: 'ERROR',
+        message: 'Unhandled error occurred', 
+        context: 'errorHandler', 
+        customAttributes: { message, status, code, err } 
+    });
 
     res.status(status).json({
         error: {

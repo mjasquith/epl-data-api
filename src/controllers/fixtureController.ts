@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { CacheResponse, cacheService } from '../services/cacheService';
 import { fetchMatches } from '../services/upstreamApiService';
 import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
+import { log } from '../utils/logger';
 
 async function getData(matchType: MatchType): Promise<Match[]> {
 
@@ -17,10 +18,20 @@ async function getData(matchType: MatchType): Promise<Match[]> {
     return fetchedMatches.data;
   }
 
-  console.log(`Failed to fetch ${matchType} from upstream API: ${fetchedMatches.error}`);
+  log({
+    level: 'WARN', 
+    message: `Failed to fetch ${matchType} from upstream API: ${fetchedMatches.error}`, 
+    context: 'fixtureController', 
+    customAttributes: { matchType, error: fetchedMatches.error } 
+  });
 
   if (cached && cached.data) {
-    console.log(`Using expired cache data for matches_${matchType} due to upstream API failure`);
+    log({ 
+      level: 'INFO', 
+      message: `Using expired cache data for matches_${matchType} due to upstream API failure`, 
+      context: 'fixtureController', 
+      customAttributes: { matchType } 
+    });
     return cached.data;
   }
 

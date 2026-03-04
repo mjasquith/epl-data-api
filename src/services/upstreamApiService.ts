@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { getTeamName } from '../constants/teams';
 import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
+import { log } from '../utils/logger';
 
 const BASE_URL = 'https://api.football-data.org/v4';
 const MATCHES_ENDPOINT = '/competitions/PL/matches';
@@ -15,7 +16,12 @@ async function fetchMatches(matchType: MatchType): Promise<MatchFetchResponse> {
   const url = `${BASE_URL}${MATCHES_ENDPOINT}?${QUERY_PARAMS[matchType]}`;
 
   try {
-    console.log(`Fetching ${matchType} from upstream API: ${url}`);
+    log({ 
+      level: 'INFO', 
+      message: `Fetching '${matchType}' from upstream API: ${url}`, 
+      context: 'upstreamApiService',
+      customAttributes: { matchType, url }
+    });
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -24,9 +30,21 @@ async function fetchMatches(matchType: MatchType): Promise<MatchFetchResponse> {
     });
 
     if (!response.ok) {
-      console.log(`Upstream API error: ${response.status} ${response.statusText}`);
+      log({ 
+        level: 'ERROR', 
+        message: `Upstream API error: ${response.status} ${response.statusText}`, 
+        context: 'upstreamApiService',
+        customAttributes: { matchType, url, status: response.status, statusText: response.statusText }
+      });
       throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
     }
+
+    log({ 
+      level: 'INFO', 
+      message: `Successfully fetched '${matchType}' from upstream API`, 
+      context: 'upstreamApiService',
+      customAttributes: { matchType, url, length: response.headers.get('content-length') }
+    });
 
     const data = await response.json();
     const upstreamMatches: UpstreamMatch[] = data.matches ?? [];
