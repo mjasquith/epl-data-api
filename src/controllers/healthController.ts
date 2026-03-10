@@ -9,16 +9,19 @@ async function getHealth(
 ): Promise<void> {
   try {
     const cacheSummary = cacheService.getSummary();
+    const cacheKeys = Object.keys(cacheSummary);
+    log({
+      level: 'INFO',
+      message: 'Health check successful',
+      context: 'healthController',
+      customAttributes: {
+        cacheEntriesCount: cacheKeys.length,
+        cacheKeys: cacheKeys.join(', ')
+      }
+    });
     res.json({
       status: 'OK',
       cache: cacheSummary
-    });
-    const cacheKeys = Object.keys(cacheSummary);
-    log({ 
-      level: 'INFO', 
-      message: 'Health check successful',
-      context: 'healthController',
-      customAttributes: { cacheEntriesCount: cacheKeys.length, cacheKeys: cacheKeys.join(', ') }
     });
   } catch (err) {
     log({ 
