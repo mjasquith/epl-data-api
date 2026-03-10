@@ -5,7 +5,7 @@ import { log } from '../utils/logger';
 async function getHealth(
   _req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ): Promise<void> {
   try {
     const cacheSummary = cacheService.getSummary();
@@ -30,7 +30,7 @@ async function getHealth(
       context: 'healthController', 
       customAttributes: { error: err instanceof Error ? err.stack : String(err) } 
     });
-    _next(err);
+    next(err);
   }
 }
 
