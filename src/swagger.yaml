@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: EPL Data API
   description: Simplify the retrieval of Premier League fixtures and results data
-  version: 1.0.0
+  version: 1.1.0
   contact:
     name: mjasquith
     url: https://github.com/mjasquith/epl-data-api
@@ -16,10 +16,26 @@ servers:
     description: Production server
 
 paths:
+  /:
+    get:
+      summary: Root endpoint
+      description: Redirects to the health endpoint
+      tags:
+        - Health
+      responses:
+        '302':
+          description: Redirect to /health
+          headers:
+            Location:
+              description: Redirect target URL
+              schema:
+                type: string
+                example: /health
+
   /health:
     get:
       summary: Health check endpoint
-      description: Returns the health status of the API
+      description: Returns API health status and in-memory cache metadata
       tags:
         - Health
       responses:
@@ -28,11 +44,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
+                $ref: '#/components/schemas/HealthResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /matches/fixtures:
     get:
@@ -102,6 +120,41 @@ paths:
 
 components:
   schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - cache
+      properties:
+        status:
+          type: string
+          example: OK
+        cache:
+          type: object
+          description: In-memory cache entries keyed by cache category and type (for example, matches_fixtures)
+          additionalProperties:
+            $ref: '#/components/schemas/CacheEntrySummary'
+          example:
+            matches_fixtures:
+              expiresAt: 2026-03-10T19:30:00.000Z
+              dataLength: 21345
+
+    CacheEntrySummary:
+      type: object
+      required:
+        - expiresAt
+        - dataLength
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+          description: UTC expiration timestamp for the cache entry
+          example: 2026-03-10T19:30:00.000Z
+        dataLength:
+          type: integer
+          description: Length in characters of the JSON-stringified cached payload
+          example: 21345
+
     Match:
       type: object
       required:

@@ -5,6 +5,7 @@ import * as path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import errorHandler from './middleware/errorHandler';
 import fixtureRouter from './routes/fixtureRouter';
+import healthRouter from './routes/healthRouter';
 
 const app = express();
 
@@ -18,15 +19,13 @@ app.use(express.json());
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
-// Redirect root to API docs
+// Redirect root to health check
 app.get('/', (req, res) => {
-  res.redirect('/api-docs');
+  res.redirect('/health');
 });
 
 // Routes
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK' });
-});
+app.use('/health', healthRouter);
 
 app.use('/matches', fixtureRouter);
 
