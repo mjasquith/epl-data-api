@@ -38,7 +38,7 @@ async function getData(matchType: MatchType): Promise<Match[]> {
   return [];
 }
 
-export async function getFixtures(
+async function getFixtures(
   _req: Request,
   res: Response,
   _next: NextFunction
@@ -51,7 +51,7 @@ export async function getFixtures(
   }
 }
 
-export async function getResults(
+async function getResults(
   _req: Request,
   res: Response,
   _next: NextFunction
@@ -64,7 +64,7 @@ export async function getResults(
   }
 }
 
-export async function getAllMatches(
+async function getAllMatches(
   _req: Request,
   res: Response,
   _next: NextFunction
@@ -76,3 +76,5 @@ export async function getAllMatches(
     _next(err);
   }
 }
+
+export { getFixtures, getResults, getAllMatches };
