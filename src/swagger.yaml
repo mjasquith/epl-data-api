@@ -152,7 +152,7 @@ components:
           example: 2026-03-10T19:30:00.000Z
         dataLength:
           type: integer
-          description: Length in bytes of the JSON-stringified cached payload
+          description: Length in characters of the JSON-stringified cached payload
           example: 21345
 
     Match:
