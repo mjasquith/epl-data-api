@@ -76,8 +76,8 @@ class CacheService {
     this.cache.delete(cacheKey);
   }
 
-  getSummary(): Record<string, { expiresAt: string; dataLength: number } | null> {
-    var summary: Record<string, { expiresAt: string; dataLength: number } | null> = {};
+  getSummary(): Record<string, { expiresAt: string; dataLength: number }> {
+    const summary: Record<string, { expiresAt: string; dataLength: number }> = {};
     for (const [key, entry] of this.cache.entries()) {
       summary[key] = {
         expiresAt: new Date(entry.expires).toISOString(),
