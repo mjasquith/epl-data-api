@@ -11,6 +11,7 @@ interface Config {
     matches?: {
       fixtures?: number;
       results?: number;
+      live?: number;
       all?: number;
     };
   };
