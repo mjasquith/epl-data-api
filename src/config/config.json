@@ -5,6 +5,7 @@
     "matches": {
       "fixtures": 3600000,
       "results": 300000,
+      "live": 60000,
       "all": 300000
     }
   }
