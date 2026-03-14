@@ -64,6 +64,19 @@ async function getResults(
   }
 }
 
+async function getLiveMatches(
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): Promise<void> {
+  try {
+    const liveMatches = await getData('live');
+    res.json(liveMatches);
+  } catch (err) {
+    _next(err);
+  }
+}
+
 async function getAllMatches(
   _req: Request,
   res: Response,
@@ -77,4 +90,4 @@ async function getAllMatches(
   }
 }
 
-export { getFixtures, getResults, getAllMatches };
+export { getFixtures, getResults, getLiveMatches, getAllMatches };
