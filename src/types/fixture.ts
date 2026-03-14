@@ -9,7 +9,7 @@ export interface Match {
   awayTeamScore?: number;
 }
 
-export type MatchType = 'fixtures' | 'results' | 'all';
+export type MatchType = 'fixtures' | 'results' | 'live' |'all';
 
 export type MatchFetchResponse = {
   success: boolean;

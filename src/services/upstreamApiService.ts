@@ -9,6 +9,7 @@ const MATCHES_ENDPOINT = '/competitions/PL/matches';
 const QUERY_PARAMS: Record<MatchType, string> = {
   fixtures: 'status=SCHEDULED,POSTPONED,SUSPENDED',
   results: 'status=IN_PLAY,PAUSED,FINISHED',
+  live: 'status=IN_PLAY,PAUSED',
   all: '', // No status filter, fetch all matches
 };
 
