@@ -15,7 +15,7 @@
     "swagger-ui-express": "^5.0.0"
   },
   "name": "epl-data-api",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "Public API for Premier League fixtures and Results data",
   "main": "dist/main.js",
   "scripts": {
