@@ -1,6 +1,6 @@
 import { config } from '../config';
 import { getTeamName } from '../constants/teams';
-import { Match, MatchFetchResponse, MatchType } from '../types/fixture';
+import { Match, MatchFetchResponse, MatchStatus, MatchType } from '../types/fixture';
 import { log } from '../utils/logger';
 
 const BASE_URL = 'https://api.football-data.org/v4';
@@ -117,10 +117,9 @@ function mapMatchToFixture(match: UpstreamMatch, matchNumberOverride?: number): 
 
 function mapStatus(
   upstreamStatus: string
-): 'Scheduled' | 'Live' | 'Complete' {
+): MatchStatus {
   switch (upstreamStatus) {
     case 'SCHEDULED':
-    case 'POSTPONED':
     case 'SUSPENDED':
       return 'Scheduled';
     case 'IN_PLAY':
@@ -128,6 +127,8 @@ function mapStatus(
       return 'Live';
     case 'FINISHED':
       return 'Complete';
+    case 'POSTPONED':
+      return 'Postponed';
     default:
       return 'Scheduled';
   }
