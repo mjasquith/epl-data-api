@@ -1,15 +1,17 @@
+export type MatchStatus = 'Scheduled' | 'Live' | 'Complete' | 'Postponed';
+
 export interface Match {
   matchNumber: number;
   roundNumber: number;
   dateUtc: string;
   homeTeam: string;
   awayTeam: string;
-  status: 'Scheduled' | 'Live' | 'Complete';
+  status: MatchStatus;
   homeTeamScore?: number;
   awayTeamScore?: number;
 }
 
-export type MatchType = 'fixtures' | 'results' | 'live' |'all';
+export type MatchType = 'fixtures' | 'results' | 'live' | 'all';
 
 export type MatchFetchResponse = {
   success: boolean;
